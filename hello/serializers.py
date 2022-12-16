@@ -31,8 +31,8 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 class UserLoginSerializer(serializers.ModelSerializer):
     email = serializers.CharField(max_length=255)
     class Meta:
-         model = User
-         fields = fields = ['email','password']
+        model = User
+        fields = fields = ['email','password']
 
 class UserProfileSerializer(serializers.ModelSerializer):
     
@@ -48,9 +48,7 @@ class UserPikSerializer(serializers.ModelSerializer):
         fields =  ['User','background_image','images','postby_name']
         
 class BlogSerializer(serializers.ModelSerializer):
-    
-    pik = UserPikSerializer(read_only=True)
-    
+    pik = UserPikSerializer(many=True,read_only=True)
     class Meta:
         model = Blog
         fields =  ['tag_name','blog_name','created_date','update_date','post_by','images','pik']

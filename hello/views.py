@@ -41,30 +41,27 @@ class RegisterAPIView(APIView):
 
         serializer = UserRegisterSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            user= serializer.save()
+            user = serializer.save()
             token = get_tokens_for_user(user)
             response_data = {'user':serializer.data}
             return Response({"token":token, "msg":"Registration Succesfull "},status = status.HTTP_201_CREATED)
         return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
-
+    
     def post(self,request, format=None):
-
         ''' THIS FUNCTION PROVIDE USER LOGIN '''
 
         serializer = UserLoginSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
+            email = serializer.data.get('email')
             password = serializer.data.get('password')
-            email    = serializer.data.get('email')
             user = authenticate(email=email, password=password)
             if user is not None:
                 token = get_tokens_for_user(user)
-
-                return Response({"token":token, "msg":"login success"},status = status.HTTP_200_OK)
+                return Response({'token':token,'msg':'login succes'}, status=status.HTTP_200_OK)
             else:
-                return Response({'errors':{'non_field_errors':["username or password is not valid"]}},)
-        return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+                return Response({'errors':'email and password is not correct'}, status = status.HTTP_400_BAD_REQUEST)
 
 
 class ProfiledataView(APIView):

@@ -11,7 +11,4 @@ urlpatterns = [
       path('blog/',blogView.as_view(), name='blog'),
       path('blogfilter/',blogList.as_view(),),
       path('searchfilter/',SblogListView.as_view()),
-      
-      
-      
 ]
