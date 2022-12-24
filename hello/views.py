@@ -6,10 +6,12 @@ from .serializers import*
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes, authentication_classes
+from django.contrib.auth import logout
+from django.contrib import messages
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 
-### filter
+## filter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
 from rest_framework import filters
@@ -47,11 +49,13 @@ class RegisterAPIView(APIView):
             return Response({"token":token, "msg":"Registration Succesfull "},status = status.HTTP_201_CREATED)
         return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
 
+
 class LoginView(APIView):
     
     def post(self,request, format=None):
+        
         ''' THIS FUNCTION PROVIDE USER LOGIN '''
-
+        
         serializer = UserLoginSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             email = serializer.data.get('email')
@@ -62,6 +66,7 @@ class LoginView(APIView):
                 return Response({'token':token,'msg':'login succes'}, status=status.HTTP_200_OK)
             else:
                 return Response({'errors':'email and password is not correct'}, status = status.HTTP_400_BAD_REQUEST)
+            
 
 
 class ProfiledataView(APIView):
@@ -72,12 +77,55 @@ class ProfiledataView(APIView):
     def get(self,request, format=None):
         serializer = UserProfileSerializer(request.user)
         return Response(serializer.data, status = status.HTTP_200_OK)
-        
-
-class ProfilepikView(APIView):
+    
+    
+class UserchangePassword(APIView):
+    
     permission_classes = [IsAuthenticated]
-     
 
+    ''' THIS FUNCTION USER CHANGE PASSWORD '''
+    
+    def post(self,request):
+        serializer = UserchangepasswordSerializer(data = request.data,context={'user':request.user})
+        if serializer.is_valid(raise_exception=True):
+            return Response({'msg':'password change successfully'},status=status.HTTP_200_OK)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class ResetPasswordSendEmailView(APIView):
+    
+    ''' THIS FUNCTION PROVIDE SEND EMAIL FOR RESET PASSWORD '''
+    
+    def post(self, request, formate=None):
+        
+        serializer = SendPasswordResetEmailSerializer(data=request.data)
+        
+        if serializer.is_valid(raise_exception=True):
+            return Response({'msg':'password Reset link send. please check your Email'},status=status.HTTP_200_OK)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+            
+     
+ 
+class SetNewPasswordView(APIView):
+    
+    ''' THIS FUNCTION PROVIDE SET NEW PASSWORD COMPLETE '''
+    
+    def post(self, request, uid, token, formate=None):
+        serializer = UserPasswordResetSerializar(data=request.data,
+        context={'uid':uid, 'token':token})
+        
+        if serializer.is_valid(raise_exception=True):
+            return Response({'msg':'password Reset Succesfully'},status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+  
+     
+  
+  
+        
+ 
+class ProfilepikView(APIView):
+    
     def post(self,request, format=None):
 
         ''' THIS FUNCTION PROVIDE POST PRFILEPIK DATA '''
@@ -96,6 +144,7 @@ class ProfilepikView(APIView):
         profile = Profilepik.objects.all()
         serializers = UserPikSerializer(profile, many=True)
         return Response(serializers.data)
+    
     
 class uProfilepikView(APIView):
     
@@ -125,10 +174,11 @@ class uProfilepikView(APIView):
         user_id = self.get_object(pk)
         user_id.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-
-
+    
+    
+    
+    
+    
 class blogView(APIView):
 
 
